@@ -1,0 +1,17 @@
+{
+  "name": "voting_app",
+  "version": "1.0.0",
+  "description": "fcc voting app full stack",
+  "main": "server.js",
+  "scripts": {
+    "client": "cd client && npm run start",
+    "server": "nodemon -e js,html,json,css,pug",
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+  },
+  "author": "jtr",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^5.0.1",
+    "express": "^4.16.3"
+  }
+}
