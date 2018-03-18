@@ -61,8 +61,7 @@ const port = process.env.PORT || 5000
     passport.authenticate('twitter', { successRedirect: '/poo', failureRedirect:'/poo2' } )
   )
 
-  //testing file return and form submission
-  /**/
+  //testing
   app.get( '/poo', (req,res,next) => {
     console.log(req.user)
     res.sendFile( `${__dirname}/test.html` )
@@ -78,8 +77,6 @@ const port = process.env.PORT || 5000
     console.log(req.headers['content-type'], req.body)
     res.end()
   })
-  /**/
-
 
   //uncomment when production build is ready in client/build folder
   // app.use(‘/’, express.static(`${__dirname}/client/build`))
