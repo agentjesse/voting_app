@@ -42,7 +42,6 @@ const port = process.env.PORT || 5000
   app.use(passport.initialize())
   app.use(passport.session())
   
-
   //parse requests with urlencoded payloads to make req.body object
   app.use('/', express.urlencoded({extended:false}) )
 
@@ -55,7 +54,6 @@ const port = process.env.PORT || 5000
 
   // Redirect the user to Twitter for authentication.  When complete, Twitter will redirect the user back to /auth/twitter/callback
   app.get('/auth/twitter', passport.authenticate('twitter') )
-
   // Twitter will redirect the user to this URL after approval.  Finish the authentication process by attempting to obtain an access token. If access was granted, the user will be logged in.  Otherwise, authentication has failed.
   app.get('/auth/twitter/callback',
     passport.authenticate('twitter', { successRedirect: '/poo', failureRedirect:'/poo2' } )
@@ -63,7 +61,7 @@ const port = process.env.PORT || 5000
 
   //testing
   app.get( '/poo', (req,res,next) => {
-    console.log(req.user)
+    console.log(`current user: ${req.user}`)
     res.sendFile( `${__dirname}/test.html` )
     // next()
   })
@@ -75,7 +73,6 @@ const port = process.env.PORT || 5000
     console.log(req.headers['content-type'], req.body)
     res.end()
   })
-
 
 
   //uncomment when production build is ready in client/build folder
