@@ -35,7 +35,7 @@ const app = express()
 const port = process.env.PORT || 5000
 
 //middleware
-  // configure/use session middleware BEFORE PASSPORT!!!!
+  // configure/use express-session middleware BEFORE PASSPORT!!!!
   app.use(session( {secret:'whatever', resave:true, saveUninitialized:true} ) )
   
   //use passport
@@ -68,8 +68,6 @@ const port = process.env.PORT || 5000
     // next()
   })
   app.get( '/poo2', (req,res,next) => { //this will never get called since verify callback only implements done(null, user)
-    // console.log(`${ req.user ? 'authorized user' : 'Unauthorized user' }`)
-    console.log(`${ req.user }`)
     res.sendFile( `${__dirname}/test2.html` )
     // next()
   })
@@ -77,6 +75,8 @@ const port = process.env.PORT || 5000
     console.log(req.headers['content-type'], req.body)
     res.end()
   })
+
+
 
   //uncomment when production build is ready in client/build folder
   // app.use(‘/’, express.static(`${__dirname}/client/build`))
