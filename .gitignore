@@ -9,6 +9,8 @@ node_modules
 
 # testing
 /coverage
+test.html
+test2.html
 
 # production
 /client/build
