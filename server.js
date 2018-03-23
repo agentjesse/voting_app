@@ -1,9 +1,10 @@
 //packages
 require('dotenv').config()
-const express = require('express')
-, session = require('express-session')
-, passport = require('passport')
-, TwitterStrategy = require('passport-twitter').Strategy
+const express = require('express'),
+  // cors = require('cors'),
+  session = require('express-session'),
+  passport = require('passport'),
+  TwitterStrategy = require('passport-twitter').Strategy
 
 //setup passport
 passport.use(new TwitterStrategy({
@@ -13,44 +14,43 @@ passport.use(new TwitterStrategy({
 },
 (token, tokenSecret, profile, done) => {
     //purpose of this verify callback: find user matching credential arguments. When Passport authenticates a request, it parses the credentials contained in the request. It then invokes this verify callback with the credentials. You then check if they're valid and invokes done() to supply Passport with the user that authenticated.
-
-    // User.findOrCreate(..., function(err, user) {
-    //   if (err) { return done(err); }
-    //   done(null, user);
-    // });
+      // User.findOrCreate(..., function(err, user) {
+      //   if (err) { return done(err); }
+      //   done(null, user);
+      // });
     // console.log('twitter username: ', profile.username)
     done(null, profile.username) //supply Passport with the user that authenticated
     // done(null,false) //failed authentication on your end. (remember twitter will only return with credentials of valid twitter accounts)
   }
 ) )
-passport.serializeUser( (user, done) => {
-  done(null, user)
-})
-passport.deserializeUser( (user, done) => {
-  done(null, user)
-})
+passport.serializeUser( (user, done) => done(null, user) )
+passport.deserializeUser( (user, done) => done(null, user) )
 
 //create app
 const app = express()
-const port = process.env.PORT || 5000
 
 //middleware
+  //log all requests received
+  // app.use( /^\S+/, (req,res,next) => { //this route path matches 1 or more non whitespace chars
+  // app.use('/', (req,res,next) => { //matches /, /apples, /apples/bears
+  app.use( (req,res,next) => {
+    console.log(`${req.method} request received with url: ${req.originalUrl}`)
+    next()
+  })
+
+  //enable ALL cors requests
+  // app.use(cors())
+
   // configure/use express-session middleware BEFORE PASSPORT!!!!
   app.use(session( {secret:'whatever', resave:true, saveUninitialized:true} ) )
   
   //use passport
   app.use(passport.initialize())
   app.use(passport.session())
-  
-  //parse requests with urlencoded payloads to make req.body object
-  app.use('/', express.urlencoded({extended:false}) )
 
-  //log all requests received
-  // app.use( /^\S+/, (req,res,next) => { //this route path matches 1 or more non whitespace chars
-  app.use( '/', (req,res,next) => { //matches /, /apples, /apples/bears
-    console.log(`${req.method} request received with url: ${req.originalUrl}`)
-    next()
-  })
+  //parse requests with urlencoded or json  payloads to make req.body object
+  app.use( express.urlencoded({extended:false}) )
+  app.use( express.json() )
 
   // Redirect the user to Twitter for authentication.  When complete, Twitter will redirect the user back to /auth/twitter/callback
   app.get('/auth/twitter', passport.authenticate('twitter') )
@@ -59,32 +59,43 @@ const port = process.env.PORT || 5000
     passport.authenticate('twitter', { successRedirect: '/poo', failureRedirect:'/poo2' } )
   )
 
-  //testing
+  //trying out some routes
   app.get( '/poo', (req,res,next) => {
     console.log(`current user: ${req.user}`)
-    res.sendFile( `${__dirname}/test.html` )
-    // next()
+    res.sendFile( `${__dirname}/test.html` ) //auto sets Content-Type header as well
   })
-  app.get( '/poo2', (req,res,next) => { //this will never get called since verify callback only implements done(null, user)
+  app.get( '/poo2', (req,res,next) => { //this will never get called until verify callback fails authentication
     res.sendFile( `${__dirname}/test2.html` )
-    // next()
   })
   app.post( '/give_food', (req,res,next) => {
     console.log(req.headers['content-type'], req.body)
     res.end()
   })
-
-
-  //uncomment when production build is ready in client/build folder
-  // app.use(‘/’, express.static(`${__dirname}/client/build`))
-
+  app.get( '/garbage', (req,res,next) => {
+    res.send({poops:41})
+    // res.redirect('http://example.com') //confusing cors issue
+  })
+  
   app.get('/api/hello', (req,res) => {
     res.send({ express: '...Hello From Express' })
   })
+
+  //Serve static files from the React app
+  // app.use( '*', express.static(`${__dirname}/client/build`) )
+
+  //catch-all handler to serve react app if no routes matched.
+  //uncomment when production build is ready in client/build folder
+  app.get('*', (req, res) => {
+    console.log('non-server request received... sending client build index.html to handle the request instead')
+    // res.sendFile(`${__dirname}/client/build/index.html`)
+    res.sendFile(`${__dirname}/test.html`)
+  });
 
 //error handler
 app.use((err,req,res,next)=> {
   res.status(err.status || 500)
 })
 
+//start listening
+const port = process.env.PORT || 5000
 app.listen(port, () => console.log(`Listening on port ${port}`))
