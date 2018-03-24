@@ -10,7 +10,7 @@ const express = require('express'),
 passport.use(new TwitterStrategy({
   consumerKey: process.env.TWITTER_CONSUMER_KEY,
   consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-  callbackURL: "http://localhost:5000/auth/twitter/callback"
+  callbackURL: "http://localhost:3000/auth/twitter/callback" //auth only works in production when serving from port 3000
 },
 (token, tokenSecret, profile, done) => {
     //purpose of this verify callback: find user matching credential arguments. When Passport authenticates a request, it parses the credentials contained in the request. It then invokes this verify callback with the credentials. You then check if they're valid and invokes done() to supply Passport with the user that authenticated.
@@ -33,7 +33,7 @@ const app = express()
   //log all requests received
   // app.use( /^\S+/, (req,res,next) => { //this route path matches 1 or more non whitespace chars
   // app.use('/', (req,res,next) => { //matches /, /apples, /apples/bears
-  app.use( (req,res,next) => {
+  app.use( (req,res,next) => { //defaults to '/'
     console.log(`${req.method} request received with url: ${req.originalUrl}`)
     next()
   })
@@ -42,7 +42,8 @@ const app = express()
   // app.use(cors())
 
   // configure/use express-session middleware BEFORE PASSPORT!!!!
-  app.use(session( {secret:'whatever', resave:true, saveUninitialized:true} ) )
+  //this saves a cookie to the browser with the user. future requests that don't originate from the react app will have access to req.user. the twitter auth link from production originates from the app but the redirection then uses the verify callback which populates req.user
+  app.use(session( {secret:'poopooface404omg', resave:true, saveUninitialized:true} ) )
   
   //use passport
   app.use(passport.initialize())
@@ -52,50 +53,51 @@ const app = express()
   app.use( express.urlencoded({extended:false}) )
   app.use( express.json() )
 
-  // Redirect the user to Twitter for authentication.  When complete, Twitter will redirect the user back to /auth/twitter/callback
+  // Redirect the user to Twitter for authentication.  When complete, Twitter will redirect to /auth/twitter/callback
   app.get('/auth/twitter', passport.authenticate('twitter') )
-  // Twitter will redirect the user to this URL after approval.  Finish the authentication process by attempting to obtain an access token. If access was granted, the user will be logged in.  Otherwise, authentication has failed.
+  // Twitter will redirect user here.  Finish the authentication process by attempting to obtain an access token. If access was granted, the user will be logged in.  Otherwise, authentication has failed.
   app.get('/auth/twitter/callback',
     passport.authenticate('twitter', { successRedirect: '/poo', failureRedirect:'/poo2' } )
   )
 
   //trying out some routes
   app.get( '/poo', (req,res,next) => {
-    console.log(`current user: ${req.user}`)
+    console.log(`/poo current user: ${req.user}`)
     res.sendFile( `${__dirname}/test.html` ) //auto sets Content-Type header as well
   })
   app.get( '/poo2', (req,res,next) => { //this will never get called until verify callback fails authentication
+    console.log(`/poo2 current user: ${req.user}`)
     res.sendFile( `${__dirname}/test2.html` )
   })
   app.post( '/give_food', (req,res,next) => {
+    console.log(`/give_food current user: ${req.user}`)
     console.log(req.headers['content-type'], req.body)
-    res.end()
+    res.send(`received: ${req.body.food}`)
   })
   app.get( '/garbage', (req,res,next) => {
     res.send({poops:41})
-    // res.redirect('http://example.com') //confusing cors issue
   })
   
   app.get('/api/hello', (req,res) => {
     res.send({ express: '...Hello From Express' })
   })
 
-  //Serve static files from the React app
-  // app.use( '*', express.static(`${__dirname}/client/build`) )
+  //for production: Serve static files from the React app
+  // app.use( express.static(`${__dirname}/client/build`) )
 
   //catch-all handler to serve react app if no routes matched.
   //uncomment when production build is ready in client/build folder
-  app.get('*', (req, res) => {
-    console.log('non-server request received... sending client build index.html to handle the request instead')
-    // res.sendFile(`${__dirname}/client/build/index.html`)
-    res.sendFile(`${__dirname}/test.html`)
-  });
+  // app.get('*', (req, res) => {
+  //   console.log('non-server request received... sending client build index.html to handle the request instead')
+  //   res.sendFile(`${__dirname}/client/build/index.html`)
+  //   // res.sendFile(`${__dirname}/test.html`)
+  // })
+
 
 //error handler
-app.use((err,req,res,next)=> {
-  res.status(err.status || 500)
-})
+app.use((err,req,res,next)=> { res.status(err.status || 500) })
 
 //start listening
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000 //use port 5000 for dev.
+// const port = process.env.PORT || 3000 //stick to create-react-app's default port 3000 for production.
 app.listen(port, () => console.log(`Listening on port ${port}`))

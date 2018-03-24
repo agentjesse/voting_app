@@ -18,8 +18,10 @@ class App extends Component {
   }
 
   callApi = async ()=> {
+    // console.log(`making fetch`)
     const response = await fetch('/api/hello') //this will pass through the proxy for sure. not sure about browser based url requests...maybe react-router will handle because port 3000 is forced there?
     const body = await response.json()
+    // console.log(`body:`,body)
     if (response.status !== 200) throw Error(body.message)
     return body
   }
@@ -42,7 +44,8 @@ class App extends Component {
     return (
       <div className="App">
         <button onClick={this.getGarbage}>garbage</button>
-        <a href="http://example.com">link</a>
+        <a href="http://example.com">example.com</a>
+        <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
         <p>{this.state.response}</p>
         <Chart />
       </div>
