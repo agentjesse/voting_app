@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import Chart from './Chart'
 import './App.css'
 
-//initialize context and only grab Provider/Consumer component pair from the returned object. 
-//Provider / Consumer CANNOT BE RENAMED!!!!!
+//initialize context, destructure result to grab Provider/Consumer component pair. 
+//Provider / Consumer components CANNOT BE RENAMED!!!!!
 const { Provider, Consumer } = React.createContext()
 //enhance by adding state to provider component
 class MyProvider extends Component {
   state = {
-    cats:43
+    cats:43,
+    pies:10000
   }
   render() {
     return (
@@ -76,11 +77,16 @@ class App extends Component {
         <hr/>
 
         <p>testing context api</p>
-        <MyProvider>
+        {/*
+          The Consumer below must ALWAYS be rendered with only ONE function as a child. no comments either!!
+          The Consumer component subscribes to context changes. The function receives the current context value and returns a React node. All consumers are re-rendered whenever the Provider value changes. May occur when passing an object as a value since a new one is created on every render of the Provider component. To get around this, lift the value into the parent’s state.
+        */}
+        <MyProvider> 
           <Consumer>
-            { ( {state, actions} )=> (  //value object available to consumer from provider is destructured
+            { ( {state,actions} )=> (  //value object available to consumer from provider is destructured
               <Fragment>
                 <p>{`cats from dynamic store: ${state.cats}`}</p>
+                <p>pies:{state.pies}</p>
                 <button onClick={actions.incrementCats}>more cats!</button>
               </Fragment>
             ) }
