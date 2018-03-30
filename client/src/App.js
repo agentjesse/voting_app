@@ -1,7 +1,31 @@
 import React, { Component, Fragment } from 'react'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import Chart from './Chart'
 import './App.css'
+
+//initialize context and only grab Provider/Consumer component pair from the returned object. 
+//Provider / Consumer CANNOT BE RENAMED!!!!!
+const { Provider, Consumer } = React.createContext()
+//enhance by adding state to provider component
+class MyProvider extends Component {
+  state = {
+    cats:43
+  }
+  render() {
+    return (
+      <Provider
+        value={ {  //here value is an object, but can be anything. available in the consumer child function
+          state: this.state,
+          actions: {
+            incrementCats: ()=> this.setState( {cats: this.state.cats + 1} )
+          }
+        } }
+      >
+        {this.props.children}
+      </Provider>
+    )
+  }
+}
 
 class App extends Component {
   constructor(props) {
@@ -43,27 +67,48 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+
         <button onClick={this.getGarbage}>garbage</button>
         <a href="http://example.com">example.com</a>
         <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
         <p>{this.state.response}</p>
         <Chart />
+        <hr/>
+
+        <p>testing context api</p>
+        <MyProvider>
+          <Consumer>
+            { ( {state, actions} )=> (  //value object available to consumer from provider is destructured
+              <Fragment>
+                <p>{`cats from dynamic store: ${state.cats}`}</p>
+                <button onClick={actions.incrementCats}>more cats!</button>
+              </Fragment>
+            ) }
+          </Consumer>
+        </MyProvider>
 
         <hr/>
         <Router>
           <Fragment>
 
+            {/* regular link here triggers refresh and load this main component again. messy, but gets the job done quickly */}
             <a href='/'>Home</a>
             
+            {/* proper links to routes that create modified anchor tags (prevent default refresh) */}
             <Link to='/cat-farts'>Cat Farts</Link>
             <Link to='/squirrel-poop'>Squirrel poop</Link>
             <Link to='/dog-breath'>Dog breath</Link>
 
             <hr/>
 
-            <Route path='/cat-farts' render={ ()=> <div>cat fart component</div> }/>
-            <Route path='/squirrel-poop' component={ Squirrelpoop }/>
-            <Route path='/dog-breath' render={ props=> <DogBreath {...props} age={42}/> }/>
+            {/*
+              different types of rendering. <Switch> renders the first mathched <Route>/<Redirect> exclusively. In contrast, every <Route> that matches the location renders inclusively.
+            */}
+            <Switch>
+              <Route path='/cat-farts' render={ ()=> <div>cat fart component</div> }/>
+              <Route path='/squirrel-poop' component={ Squirrelpoop }/>
+              <Route path='/dog-breath' render={ props=> <DogBreath {...props} age={42}/> }/>
+            </Switch>
 
           </Fragment>
         </Router>
