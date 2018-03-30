@@ -7,12 +7,13 @@ const express = require('express'),
   TwitterStrategy = require('passport-twitter').Strategy
 
 //setup passport
-passport.use(new TwitterStrategy({
-  consumerKey: process.env.TWITTER_CONSUMER_KEY,
-  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-  callbackURL: "http://localhost:3000/auth/twitter/callback" //auth only works in production when serving from port 3000
-},
-(token, tokenSecret, profile, done) => {
+passport.use(new TwitterStrategy(
+  {
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    callbackURL: "http://localhost:3000/auth/twitter/callback" //auth only works in production when serving from port 3000
+  },
+  (token, tokenSecret, profile, done) => {
     //purpose of this verify callback: find user matching credential arguments. When Passport authenticates a request, it parses the credentials contained in the request. It then invokes this verify callback with the credentials. You then check if they're valid and invokes done() to supply Passport with the user that authenticated.
       // User.findOrCreate(..., function(err, user) {
       //   if (err) { return done(err); }
