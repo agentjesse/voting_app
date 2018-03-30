@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 import Chart from './Chart'
 import './App.css'
 
@@ -47,9 +48,40 @@ class App extends Component {
         <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
         <p>{this.state.response}</p>
         <Chart />
+
+        <hr/>
+        <Router>
+          <Fragment>
+
+            <a href='/'>Home</a>
+            
+            <Link to='/cat-farts'>Cat Farts</Link>
+            <Link to='/squirrel-poop'>Squirrel poop</Link>
+            <Link to='/dog-breath'>Dog breath</Link>
+
+            <hr/>
+
+            <Route path='/cat-farts' render={ ()=> <div>cat fart component</div> }/>
+            <Route path='/squirrel-poop' component={ Squirrelpoop }/>
+            <Route path='/dog-breath' render={ props=> <DogBreath {...props} age={42}/> }/>
+
+          </Fragment>
+        </Router>
+
       </div>
+
     )
   }
 }
+
+const Squirrelpoop = ( { match: {url} } )=>
+  <div>Squirrel poop component with url: {url}</div>
+
+const DogBreath = ( { match: {url}, age } )=>
+  <div>
+    DogBreath component with url: {url}
+    <br/>
+    age: {age}
+  </div>
 
 export default App
