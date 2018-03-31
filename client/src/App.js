@@ -73,7 +73,7 @@ class App extends Component {
 
         <div className="App">
 
-          <button onClick={this.getGarbage}>garbage!</button>
+          <button onClick={this.getGarbage}>garbage</button>
           <a href="http://example.com">example.com</a>
           <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
           <p>{this.state.response}</p>
