@@ -94,7 +94,15 @@ class App extends Component {
               </Fragment>
             ) }
           </Consumer>
+          <hr/>
 
+          <p>testing render prop pattern/technique</p>
+          {/* https://reactjs.org/docs/render-props.html */}
+          {/* below I am using a component with a render prop by providing the prop in the named list of attributes. can also be inside the element as a child function, and called in the component as props.children() :
+            <Piggy>{ data => <p>I'm a pig that likes:{data}</p>}</Piggy>
+          */}
+          <Piggy render={ data => <p>I'm a pig that likes:{data}</p> }/>
+          
           <hr/>
           <Router>
             <Fragment>
@@ -129,10 +137,24 @@ class App extends Component {
   }
 }
 
-const Squirrelpoop = ( { match: {url} } )=>
+const Piggy = ( {render} ) => { //destructure props.render
+  const food = 'apples'
+  // the jsx you return below will appear where the Piggy component was used.
+  //call the passed in function that will used some data argument (in this case const food) and it will return jsx, which you in turn return from this component
+  return render(food)
+  //.....or more stuff can be done instead of just calling the function with data, like rendering extra components:
+  // return (
+  //   <div>
+  //     <p>i'm a paragraph in a div. rendered before calling the render prop function</p>
+  //     {render(food)}
+  //   </div>
+  // )
+}
+
+const Squirrelpoop = ( { match: {url} } ) =>
   <div>Squirrel poop component with url: {url}</div>
 
-const DogBreath = ( { match: {url}, age } )=>
+const DogBreath = ( { match: {url}, age } ) =>
   <div>
     DogBreath component with url: {url}
     <br/>
