@@ -14,8 +14,9 @@ class MyProvider extends Component {
   }
   render() {
     return (
+      // here the value Provider passes on to the Consumers is an object, but can be anything. It's available in a consumers child function. All consumers are re-rendered whenever the Provider value changes. watch for caveats when provider set with value in parent: https://reactjs.org/docs/context.html#caveats
       <Provider
-        value={ {  //here value is an object, but can be anything. available in the consumer child function
+        value={ {
           state: this.state,
           actions: {
             incrementCats: ()=> this.setState( {cats: this.state.cats + 1} )
@@ -67,21 +68,23 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      //Wrap the entire app in your enhanced provider component, and all consumer descendants will be able to access the store
+      <MyProvider> 
 
-        <button onClick={this.getGarbage}>garbage</button>
-        <a href="http://example.com">example.com</a>
-        <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
-        <p>{this.state.response}</p>
-        <Chart />
-        <hr/>
+        <div className="App">
 
-        <p>testing context api</p>
-        {/*
-          The Consumer below must ALWAYS be rendered with only ONE function as a child. no comments either!!
-          The Consumer component subscribes to context changes. The function receives the current context value and returns a React node. All consumers are re-rendered whenever the Provider value changes. May occur when passing an object as a value since a new one is created on every render of the Provider component. To get around this, lift the value into the parent’s state.
-        */}
-        <MyProvider> 
+          <button onClick={this.getGarbage}>garbage</button>
+          <a href="http://example.com">example.com</a>
+          <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
+          <p>{this.state.response}</p>
+          <Chart />
+          <hr/>
+
+          <p>testing context api</p>
+          {/*
+            The Consumer below must ALWAYS be rendered with only ONE function as a child. no comments either!!
+            The Consumer component subscribes to context changes. The function receives the current context value and returns a React node. All consumers re-render whenever the Provider value changes.
+          */}
           <Consumer>
             { ( {state,actions} )=> (  //value object available to consumer from provider is destructured
               <Fragment>
@@ -91,35 +94,36 @@ class App extends Component {
               </Fragment>
             ) }
           </Consumer>
-        </MyProvider>
 
-        <hr/>
-        <Router>
-          <Fragment>
+          <hr/>
+          <Router>
+            <Fragment>
 
-            {/* regular link here triggers refresh and load this main component again. messy, but gets the job done quickly */}
-            <a href='/'>Home</a>
-            
-            {/* proper links to routes that create modified anchor tags (prevent default refresh) */}
-            <Link to='/cat-farts'>Cat Farts</Link>
-            <Link to='/squirrel-poop'>Squirrel poop</Link>
-            <Link to='/dog-breath'>Dog breath</Link>
+              {/* regular link here triggers refresh and load this main component again. messy, but gets the job done quickly */}
+              <a href='/'>Home</a>
+              
+              {/* proper links to routes that create modified anchor tags (prevent default refresh) */}
+              <Link to='/cat-farts'>Cat Farts</Link>
+              <Link to='/squirrel-poop'>Squirrel poop</Link>
+              <Link to='/dog-breath'>Dog breath</Link>
 
-            <hr/>
+              <hr/>
 
-            {/*
-              different types of rendering. <Switch> renders the first mathched <Route>/<Redirect> exclusively. In contrast, every <Route> that matches the location renders inclusively.
-            */}
-            <Switch>
-              <Route path='/cat-farts' render={ ()=> <div>cat fart component</div> }/>
-              <Route path='/squirrel-poop' component={ Squirrelpoop }/>
-              <Route path='/dog-breath' render={ props=> <DogBreath {...props} age={42}/> }/>
-            </Switch>
+              {/*
+                different types of rendering. <Switch> renders the first mathched <Route>/<Redirect> exclusively. In contrast, every <Route> that matches the location renders inclusively.
+              */}
+              <Switch>
+                <Route path='/cat-farts' render={ ()=> <div>cat fart component</div> }/>
+                <Route path='/squirrel-poop' component={ Squirrelpoop }/>
+                <Route path='/dog-breath' render={ props=> <DogBreath {...props} age={42}/> }/>
+              </Switch>
 
-          </Fragment>
-        </Router>
+            </Fragment>
+          </Router>
 
-      </div>
+        </div>
+
+      </MyProvider>
 
     )
   }
