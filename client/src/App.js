@@ -77,6 +77,7 @@ class App extends Component {
           <a href="http://example.com">example.com</a>
           <a href="/auth/twitter">twitter auth link (only works in prod when express hosts client app on same port)</a>
           <p>{this.state.response}</p>
+          { 1>0 && <p>ooh logical 2xampersand render</p> }
           <Chart />
           <hr/>
 
